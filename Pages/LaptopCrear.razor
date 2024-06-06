@@ -1,0 +1,117 @@
+﻿@page "/Laptop-crear"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<h3>Laptop</h3>
+
+<EditForm Model="@laptop" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="NumSerie">Número de serie de la laptop</label>
+        <InputText id="NumSerie" @bind-Value="laptop.NumSerie" class="form-control" />
+        <ValidationMessage For="() => laptop.NumSerie" />
+    </div>
+    <div class="form-group">
+        <label for="Marca">Marca de la laptop</label>
+        <InputText id="Marca" @bind-Value="laptop.Marca" class="form-control" />
+        <ValidationMessage For="() => laptop.Marca" />
+    </div>
+    <div class="form-group">
+        <label for="Modelo">Modelo de la laptop</label>
+        <InputText id="Modelo" @bind-Value="laptop.Modelo" class="form-control" />
+        <ValidationMessage For="() => laptop.Modelo" />
+    </div>
+    <div class="form-group">
+        <label for="Ram">Memoria RAM de la laptop</label>
+        <InputText id="Ram" @bind-Value="laptop.Ram" class="form-control" />
+        <ValidationMessage For="() => laptop.Ram" />
+    </div>
+    <div class="form-group">
+        <label for="Almacenamiento">Almacenamiento de la laptop</label>
+        <InputText id="Almacenamiento" @bind-Value="laptop.Almacenamiento" class="form-control" />
+        <ValidationMessage For="() => laptop.Almacenamiento" />
+    </div>
+    <div class="form-group">
+        <p role="status">Current count: @currentCount</p>
+        <button class="btn btn-primary" @onclick="IncrementCount">Guardar</button>
+    </div>
+</EditForm>
+
+@if (laptops != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>NumSerie</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Ram</th>
+                <th>Almacenamiento</th>
+                <th>Eliminar</th>
+                <th>Editar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var laptop in laptops)
+            {
+                <tr>
+                    <td>@laptop.NumSerie</td>
+                    <td>@laptop.Marca</td>
+                    <td>@laptop.Modelo</td>
+                    <td>@laptop.Ram</td>
+                    <td>@laptop.Almacenamiento</td>
+                    <td>
+                        <button class="btn btn-danger"
+                                @onclick="@(() => BorrarLaptop(laptop.Ram))">
+                            Eliminar
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning"
+                                @onclick="@(() => NavigationManager.NavigateTo($"/laptop-editar/{laptop.Ram}"))">
+                            Editar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Laptop laptop = new Laptop();
+    List<Laptop> laptops = new List<Laptop>();
+
+
+    protected async Task Guardar()
+    {
+        laptops.Add(laptop);
+
+        await localStorage.SetItemAsync("laptops", laptops);
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        laptops = await localStorage.GetItemAsync<List<Laptop>>("laptops");
+        if (laptops == null)
+            laptops = new List<Laptop>();
+    }
+
+    protected async Task BorrarLaptop(string Ram)
+    {
+        laptops.Remove(laptops.First(c => c.Ram == Ram));
+        await localStorage.SetItemAsync("laptops", laptops);
+
+    }
+
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}

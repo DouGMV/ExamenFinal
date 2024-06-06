@@ -1,0 +1,68 @@
+﻿@page "/Laptop-editar/{Ram}"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<h3>LaptopEditar</h3>
+
+<EditForm Model="@laptop" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="NumSerie">Número de serie de la laptop</label>
+        <InputText id="NumSerie" @bind-Value="laptop.NumSerie" class="form-control" />
+        <ValidationMessage For="() => laptop.NumSerie" />
+    </div>
+    <div class="form-group">
+        <label for="Marca">Marca de la laptop</label>
+        <InputText id="Marca" @bind-Value="laptop.Marca" class="form-control" />
+        <ValidationMessage For="() => laptop.Marca" />
+    </div>
+    <div class="form-group">
+        <label for="Modelo">Modelo de la laptop</label>
+        <InputText id="Modelo" @bind-Value="laptop.Modelo" class="form-control" />
+        <ValidationMessage For="() => laptop.Modelo" />
+    </div>
+    <div class="form-group">
+        <label for="Ram">Memoria RAM de la laptop</label>
+        <InputText id="Ram" @bind-Value="laptop.Ram" class="form-control" />
+        <ValidationMessage For="() => laptop.Ram" />
+    </div>
+    <div class="form-group">
+        <label for="Almacenamiento">Almacenamiento de la laptop</label>
+        <InputText id="Almacenamiento" @bind-Value="laptop.Almacenamiento" class="form-control" />
+        <ValidationMessage For="() => laptop.Almacenamiento" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public string ram { get; set; }
+
+    private Laptop laptop = new Laptop();
+    List<Laptop> laptops = new List<Laptop>();
+
+
+    protected async Task Guardar()
+    {
+        await localStorage.SetItemAsync("laptops", laptops);
+
+        //Al finalizar de guardar regresamos al formulario original
+        NavigationManager.NavigateTo("/laptop-crear");
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {   //Cargar todos las revistas guardadas
+        laptops = await localStorage.GetItemAsync<List<Laptop>>("laptops");
+
+        if (laptop == null)
+            laptops = new List<Laptop>();
+
+        laptop = laptops.Find(c => c.Ram == ram);
+    }
+}
